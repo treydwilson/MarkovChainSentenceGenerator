@@ -21,7 +21,7 @@ namespace MarkovChainGui
     /// </summary>
     public partial class MainWindow : Window
     {
-        private TextMarkovChains.MultiDeepMarkovChain multi = new TextMarkovChains.MultiDeepMarkovChain(8);
+        private TextMarkovChains.MultiDeepMarkovChain multi = new TextMarkovChains.MultiDeepMarkovChain(4);
         
         public MainWindow()
         {
