@@ -34,6 +34,9 @@
             <TextBox x:Name="txtOutput" Height="80" TextWrapping="Wrap" Grid.Column="1"></TextBox>
             <Button x:Name="btnGenerate" Width="100" Click="btnGenerate_Click" Margin="10" Grid.Row="1" Grid.Column="1">Generate</Button>
             </Grid>
+            <TextBox x:Name="txtTypingTest" Height="80" TextWrapping="Wrap" KeyUp="txtTypingTest_KeyUp"></TextBox>
+            <Button x:Name="btnTypingTest" Width="100" Click="btnTypingTest_Click" Margin="10">Test Predictive Text</Button>
+            <TextBox x:Name="txtTypingTestOutput" Height="80"></TextBox>
         </StackPanel>
     </Grid>
 </Window>

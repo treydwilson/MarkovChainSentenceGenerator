@@ -208,6 +208,70 @@ namespace TextMarkovChains
             return sb.ToString();
         }
 
+        public List<string> getNextLikelyWord(string previousText)
+        {
+            //TODO:  Do a code review of this function, it was written pretty hastily
+            //TODO:  Include results that use a chain of less length that the depth.  This will allow for more results when the depth is large
+            List<string> results = new List<string>();
+            previousText = previousText.ToLower();
+            previousText = previousText.Replace("/", "").Replace("\\", "").Replace("[]", "").Replace(",", "");
+            previousText = previousText.Replace("\r\n\r\n", " ").Replace("\r", "").Replace("\n", " "); //The first line is a hack to fix two \r\n (usually a <p> on a website)
+                        
+            if (previousText == string.Empty)
+            {
+                //Assume start of sentence
+
+                List<ChainProbability> nextChains = head.getPossibleNextWords(new string[0]);
+                nextChains.Sort((x, y) =>
+                {
+                    return x.count - y.count;
+                });
+                foreach (ChainProbability cp in nextChains)
+                    results.Add(cp.chain.text);
+            }
+            else
+            {
+                string[] initialSplit = previousText.Split(' ');
+
+                string[] previousWords;
+                if (initialSplit.Length > depth)
+                {
+                    previousWords = new string[depth];
+                    for (int i = 0; i < depth; i++)
+                        previousWords[i] = initialSplit[initialSplit.Length - depth + i];
+                }
+                else
+                {
+                    previousWords = new string[initialSplit.Length];
+                    for (int i = 0; i < initialSplit.Length; i++)
+                        previousWords[i] = initialSplit[i];
+                }
+
+                if (!chains.ContainsKey(previousWords[0]))
+                    return new List<string>();
+
+                try
+                {
+                    Chain headerChain = chains[previousWords[0]];
+                    string[] sadPreviousWords = new string[previousWords.Length - 1]; //They are sad because I'm allocating extra memory for a slightly different array and there's probably a better way but I'm lazy :(
+                    for(int i=1; i<previousWords.Length; i++)
+                        sadPreviousWords[i -1] = previousWords[i];
+                    List<ChainProbability> nextChains = headerChain.getPossibleNextWords(sadPreviousWords);
+                    nextChains.Sort((x, y) =>
+                        {
+                            return x.count - y.count;
+                        });
+                    foreach (ChainProbability cp in nextChains)
+                        results.Add(cp.chain.text);
+                }
+                catch (Exception excp)
+                {
+                    return new List<string>();
+                }
+            }
+            return results;
+        }
+
         /// <summary>
         /// Save the data contained in this Markov Chain to an XML document.
         /// </summary>
@@ -293,6 +357,27 @@ namespace TextMarkovChains
                         return currentChain.nextNodes[key].chain;
                 }
                 return null;
+            }
+
+            internal List<ChainProbability> getPossibleNextWords(string[] words)
+            {
+                List<ChainProbability> results = new List<ChainProbability>();
+
+                if (words.Length == 0)
+                {
+                    foreach (string key in nextNodes.Keys)
+                        results.Add(nextNodes[key]);
+                    return results;
+                }
+
+                ChainProbability currentChain = nextNodes[words[0]];
+                for (int i = 1; i < words.Length; i++)
+                    currentChain = currentChain.getNextNode(words[i]);
+
+                foreach (string key in currentChain.nextNodes.Keys)
+                    results.Add(currentChain.nextNodes[key]);
+                
+                return results;
             }
 
             internal XmlElement getXml(XmlDocument xd)

@@ -62,5 +62,25 @@ namespace MarkovChainGui
                 multi.feed(xd);
             }
         }
+
+        private void btnTypingTest_Click(object sender, RoutedEventArgs e)
+        {
+            predictiveText();
+        }
+
+        private void predictiveText()
+        {
+            List<string> test = multi.getNextLikelyWord(txtTypingTest.Text.Trim());
+            StringBuilder sb = new StringBuilder();
+            foreach (string s in test)
+                sb.Append(s).Append(" ");
+            txtTypingTestOutput.Text = sb.ToString();
+        }
+
+        private void txtTypingTest_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+                predictiveText();
+        }
     }
 }
